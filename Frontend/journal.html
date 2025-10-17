@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Sportacus - Workout Journal</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        .back-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        .journal-actions { display: flex; gap: 15px; margin-bottom: 30px; }
+        .journal-actions button { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .journal-actions button:hover { background: #218838; }
+        .new-entry-form { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 30px; display: none; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .exercise-entry { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .exercise-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr auto; gap: 10px; align-items: center; }
+        .exercise-row input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .add-exercise-btn { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .remove-exercise-btn { background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        .journal-entries { display: flex; flex-direction: column; gap: 20px; }
+        .journal-entry { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; }
+        .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .entry-date { color: #666; font-size: 14px; }
+        .entry-title { font-size: 18px; font-weight: bold; color: #333; }
+        .edit-btn { background: #ffc107; color: #212529; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .exercise-list { display: flex; flex-direction: column; gap: 10px; }
+        .exercise-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; }
+        .exercise-checkbox { width: 20px; height: 20px; }
+        .exercise-details { flex: 1; }
+        .exercise-name { font-weight: bold; }
+        .exercise-stats { color: #666; font-size: 14px; }
+        .completed { text-decoration: line-through; opacity: 0.6; }
+        .loading { color: #666; font-style: italic; text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>📝 Workout Journal</h1>
+            <p>Track your fitness journey</p>
+        </div>
+        <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+    </div>
+
+    <div class="journal-actions">
+        <button onclick="toggleNewEntryForm()">+ New Workout Entry</button>
+    </div>
+
+    <div class="new-entry-form" id="newEntryForm">
+        <h3>Create New Workout Entry</h3>
+        <form id="workoutForm">
+            <div class="form-group">
+                <label for="workoutDate">Date:</label>
+                <input type="date" id="workoutDate" required>
+            </div>
+            <div class="form-group">
+                <label for="workoutTitle">Workout Title:</label>
+                <input type="text" id="workoutTitle" placeholder="e.g., Push Day, Leg Day, Cardio Session" required>
+            </div>
+            <div class="form-group">
+                <label for="workoutNotes">Notes (optional):</label>
+                <textarea id="workoutNotes" rows="3" placeholder="How did you feel? Any observations?"></textarea>
+            </div>
+            
+            <h4>Exercises</h4>
+            <div id="exercisesList">
+                <div class="exercise-entry">
+                    <div class="exercise-row">
+                        <input type="text" placeholder="Exercise name" class="exercise-name" required>
+                        <input type="number" placeholder="Sets" class="exercise-sets" min="0">
+                        <input type="number" placeholder="Reps" class="exercise-reps" min="0">
+                        <input type="number" placeholder="Weight (lbs)" class="exercise-weight" min="0" step="0.5">
+                        <input type="number" placeholder="Duration (min)" class="exercise-duration" min="0">
+                        <input type="text" placeholder="Notes" class="exercise-notes">
+                        <button type="button" class="remove-exercise-btn" onclick="removeExercise(this)">×</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" class="add-exercise-btn" onclick="addExercise()">+ Add Exercise</button>
+            
+            <div style="margin-top: 20px;">
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin-right: 10px;">Save Workout</button>
+                <button type="button" onclick="cancelNewEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="journal-entries" id="journalEntries">
+        <div class="loading">Loading your workout journal...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('fitbot_token');
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        function goBack() {
+            window.location.href = 'app.html';
+        }
+
+        function toggleNewEntryForm() {
+            const form = document.getElementById('newEntryForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form.style.display === 'block') {
+                document.getElementById('workoutDate').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function cancelNewEntry() {
+            document.getElementById('newEntryForm').style.display = 'none';
+            document.getElementById('workoutForm').reset();
+        }
+
+        function addExercise() {
+            const exercisesList = document.getElementById('exercisesList');
+            const exerciseEntry = document.createElement('div');
+            exerciseEntry.className = 'exercise-entry';
+            exerciseEntry.innerHTML = `
+                <div class="exercise-row">
+                    <input type="text" placeholder="Exercise name" class="exercise-name" required>
+                    <input type="number" placeholder="Sets" class="exercise-sets" min="0">
+                    <input type="number" placeholder="Reps" class="exercise-reps" min="0">
+                    <input type="number" placeholder="Weight (lbs)" class="exercise-weight" min="0" step="0.5">
+                    <input type="number" placeholder="Duration (min)" class="exercise-duration" min="0">
+                    <input type="text" placeholder="Notes" class="exercise-notes">
+                    <button type="button" class="remove-exercise-btn" onclick="removeExercise(this)">×</button>
+                </div>
+            `;
+            exercisesList.appendChild(exerciseEntry);
+        }
+
+        function removeExercise(button) {
+            button.closest('.exercise-entry').remove();
+        }
+
+        async function saveWorkout(event) {
+            event.preventDefault();
+            
+            const exercises = [];
+            document.querySelectorAll('.exercise-entry').forEach(entry => {
+                const name = entry.querySelector('.exercise-name').value;
+                if (name.trim()) {
+                    exercises.push({
+                        name: name.trim(),
+                        sets: parseInt(entry.querySelector('.exercise-sets').value) || null,
+                        reps: parseInt(entry.querySelector('.exercise-reps').value) || null,
+                        weight: parseFloat(entry.querySelector('.exercise-weight').value) || null,
+                        duration: parseInt(entry.querySelector('.exercise-duration').value) || null,
+                        notes: entry.querySelector('.exercise-notes').value.trim()
+                    });
+                }
+            });
+
+            const workoutData = {
+                date: document.getElementById('workoutDate').value,
+                title: document.getElementById('workoutTitle').value,
+                notes: document.getElementById('workoutNotes').value,
+                exercises: exercises
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/journal/save`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(workoutData)
+                });
+
+                if (response.ok) {
+                    cancelNewEntry();
+                    loadJournalEntries();
+                } else {
+                    alert('Failed to save workout');
+                }
+            } catch (error) {
+                alert('Error saving workout: ' + error.message);
+            }
+        }
+
+        async function loadJournalEntries() {
+            try {
+                const response = await fetch(`${API_BASE}/journal/entries`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    const entries = await response.json();
+                    displayJournalEntries(entries);
+                } else if (response.status === 401) {
+                    window.location.href = 'auth.html';
+                }
+            } catch (error) {
+                document.getElementById('journalEntries').innerHTML = '<div class="loading">Error loading journal entries</div>';
+            }
+        }
+
+        function displayJournalEntries(entries) {
+            const container = document.getElementById('journalEntries');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="loading">No workout entries yet. Create your first entry above!</div>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <div class="journal-entry">
+                    <div class="entry-header">
+                        <div>
+                            <div class="entry-title">${entry.title}</div>
+                            <div class="entry-date">${new Date(entry.date).toLocaleDateString()}</div>
+                        </div>
+                        <button class="edit-btn" onclick="editWorkoutEntry(${entry.id})">Edit</button>
+                    </div>
+                    ${entry.notes ? `<p style="margin-bottom: 15px; color: #666;">${entry.notes}</p>` : ''}
+                    <div class="exercise-list">
+                        ${entry.exercises.map(exercise => `
+                            <div class="exercise-item ${exercise.completed ? 'completed' : ''}">
+                                <input type="checkbox" class="exercise-checkbox" 
+                                       ${exercise.completed ? 'checked' : ''} 
+                                       onchange="toggleExerciseCompletion(${exercise.id}, this.checked)">
+                                <div class="exercise-details">
+                                    <div class="exercise-name">${exercise.exercise_name}</div>
+                                    <div class="exercise-stats">
+                                        ${exercise.sets ? `${exercise.sets} sets` : ''}
+                                        ${exercise.reps ? ` × ${exercise.reps} reps` : ''}
+                                        ${exercise.weight ? ` @ ${exercise.weight} lbs` : ''}
+                                        ${exercise.duration_minutes ? ` • ${exercise.duration_minutes} min` : ''}
+                                        ${exercise.notes ? ` • ${exercise.notes}` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleExerciseCompletion(exerciseId, completed) {
+            try {
+                const response = await fetch(`${API_BASE}/journal/exercise/${exerciseId}/complete?completed=${completed}`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    alert('Failed to update exercise');
+                    loadJournalEntries(); // Reload to reset state
+                }
+            } catch (error) {
+                alert('Error updating exercise: ' + error.message);
+                loadJournalEntries(); // Reload to reset state
+            }
+        }
+
+        // Check authentication and load entries
+        if (!localStorage.getItem('fitbot_token')) {
+            window.location.href = 'auth.html';
+        } else {
+            loadJournalEntries();
+        }
+
+        let editingEntryId = null;
+        
+        async function editWorkoutEntry(entryId) {
+            try {
+                const response = await fetch(`${API_BASE}/journal/entry/${entryId}`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    const entry = await response.json();
+                    populateEditForm(entry);
+                    editingEntryId = entryId;
+                    toggleNewEntryForm();
+                } else {
+                    alert('Failed to load workout entry');
+                }
+            } catch (error) {
+                alert('Error loading workout entry: ' + error.message);
+            }
+        }
+        
+        function populateEditForm(entry) {
+            document.getElementById('workoutDate').value = entry.date;
+            document.getElementById('workoutTitle').value = entry.title;
+            document.getElementById('workoutNotes').value = entry.notes || '';
+            
+            // Clear existing exercises
+            const exercisesList = document.getElementById('exercisesList');
+            exercisesList.innerHTML = '';
+            
+            // Add exercises from entry
+            entry.exercises.forEach(exercise => {
+                const exerciseEntry = document.createElement('div');
+                exerciseEntry.className = 'exercise-entry';
+                exerciseEntry.innerHTML = `
+                    <div class="exercise-row">
+                        <input type="text" placeholder="Exercise name" class="exercise-name" value="${exercise.exercise_name}" required>
+                        <input type="number" placeholder="Sets" class="exercise-sets" value="${exercise.sets || ''}" min="0">
+                        <input type="number" placeholder="Reps" class="exercise-reps" value="${exercise.reps || ''}" min="0">
+                        <input type="number" placeholder="Weight (lbs)" class="exercise-weight" value="${exercise.weight || ''}" min="0" step="0.5">
+                        <input type="number" placeholder="Duration (min)" class="exercise-duration" value="${exercise.duration_minutes || ''}" min="0">
+                        <input type="text" placeholder="Notes" class="exercise-notes" value="${exercise.notes || ''}">
+                        <button type="button" class="remove-exercise-btn" onclick="removeExercise(this)">×</button>
+                    </div>
+                `;
+                exercisesList.appendChild(exerciseEntry);
+            });
+            
+            // If no exercises, add one empty row
+            if (entry.exercises.length === 0) {
+                addExercise();
+            }
+        }
+        
+        async function saveWorkout(event) {
+            event.preventDefault();
+            
+            const exercises = [];
+            document.querySelectorAll('.exercise-entry').forEach(entry => {
+                const name = entry.querySelector('.exercise-name').value;
+                if (name.trim()) {
+                    exercises.push({
+                        name: name.trim(),
+                        sets: parseInt(entry.querySelector('.exercise-sets').value) || null,
+                        reps: parseInt(entry.querySelector('.exercise-reps').value) || null,
+                        weight: parseFloat(entry.querySelector('.exercise-weight').value) || null,
+                        duration: parseInt(entry.querySelector('.exercise-duration').value) || null,
+                        notes: entry.querySelector('.exercise-notes').value.trim()
+                    });
+                }
+            });
+
+            const workoutData = {
+                date: document.getElementById('workoutDate').value,
+                title: document.getElementById('workoutTitle').value,
+                notes: document.getElementById('workoutNotes').value,
+                exercises: exercises
+            };
+
+            try {
+                const url = editingEntryId ? `${API_BASE}/journal/entry/${editingEntryId}` : `${API_BASE}/journal/save`;
+                const method = editingEntryId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(workoutData)
+                });
+
+                if (response.ok) {
+                    editingEntryId = null;
+                    cancelNewEntry();
+                    loadJournalEntries();
+                } else {
+                    alert('Failed to save workout');
+                }
+            } catch (error) {
+                alert('Error saving workout: ' + error.message);
+            }
+        }
+        
+        function cancelNewEntry() {
+            document.getElementById('newEntryForm').style.display = 'none';
+            document.getElementById('workoutForm').reset();
+            editingEntryId = null;
+        }
+        
+        document.getElementById('workoutForm').addEventListener('submit', saveWorkout);
+    </script>
+</body>
+</html>

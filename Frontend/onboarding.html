@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Sportacus - Setup Your Profile</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .onboarding-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #333; margin: 0; }
+        .step { margin-bottom: 30px; }
+        .step h3 { color: #007bff; margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; box-sizing: border-box; }
+        .form-group textarea { height: 80px; resize: vertical; }
+        .btn { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; }
+        .btn:hover { background: #218838; }
+        .progress { background: #e9ecef; height: 8px; border-radius: 4px; margin-bottom: 30px; }
+        .progress-bar { background: #007bff; height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s; }
+        .error { color: #dc3545; margin-top: 10px; }
+        .success { color: #28a745; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="header">
+            <h1>🏋️ Welcome to Agent Sportacus!</h1>
+            <p>Let's personalize your fitness journey</p>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <form id="onboardingForm">
+            <div class="step">
+                <h3>📊 Basic Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" min="13" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (lbs):</label>
+                        <input type="number" id="weight" min="66" max="660" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (inches):</label>
+                        <input type="number" id="height" min="39" max="98" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>🎯 Fitness Goals</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fitness_level">Current Fitness Level:</label>
+                        <select id="fitness_level" required>
+                            <option value="">Select level...</option>
+                            <option value="beginner">Beginner (Just starting)</option>
+                            <option value="intermediate">Intermediate (Some experience)</option>
+                            <option value="advanced">Advanced (Very experienced)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="primary_goal">Primary Goal:</label>
+                        <select id="primary_goal" required>
+                            <option value="">Select goal...</option>
+                            <option value="weight_loss">Weight Loss</option>
+                            <option value="muscle_gain">Muscle Gain</option>
+                            <option value="general_fitness">General Fitness</option>
+                            <option value="strength">Build Strength</option>
+                            <option value="endurance">Improve Endurance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="activity_level">Current Activity Level:</label>
+                    <select id="activity_level" required>
+                        <option value="">Select activity level...</option>
+                        <option value="sedentary">Sedentary (Little to no exercise)</option>
+                        <option value="lightly_active">Lightly Active (Light exercise 1-3 days/week)</option>
+                        <option value="moderately_active">Moderately Active (Moderate exercise 3-5 days/week)</option>
+                        <option value="very_active">Very Active (Hard exercise 6-7 days/week)</option>
+                        <option value="extremely_active">Extremely Active (Very hard exercise, physical job)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>💪 Fitness Experience</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="workout_frequency">How often do you currently work out?</label>
+                        <select id="workout_frequency" required>
+                            <option value="">Select frequency...</option>
+                            <option value="never">Never</option>
+                            <option value="1-2_times">1-2 times per week</option>
+                            <option value="3-4_times">3-4 times per week</option>
+                            <option value="5-6_times">5-6 times per week</option>
+                            <option value="daily">Daily</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout_duration">Preferred workout duration:</label>
+                        <select id="workout_duration" required>
+                            <option value="">Select duration...</option>
+                            <option value="15-30_min">15-30 minutes</option>
+                            <option value="30-45_min">30-45 minutes</option>
+                            <option value="45-60_min">45-60 minutes</option>
+                            <option value="60+_min">60+ minutes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="exercise_types">What types of exercise do you enjoy? (Select all that apply)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label><input type="checkbox" id="cardio" value="cardio"> Cardio/Running</label>
+                        <label><input type="checkbox" id="strength" value="strength"> Strength Training</label>
+                        <label><input type="checkbox" id="yoga" value="yoga"> Yoga/Pilates</label>
+                        <label><input type="checkbox" id="sports" value="sports"> Sports</label>
+                        <label><input type="checkbox" id="swimming" value="swimming"> Swimming</label>
+                        <label><input type="checkbox" id="cycling" value="cycling"> Cycling</label>
+                        <label><input type="checkbox" id="dancing" value="dancing"> Dancing</label>
+                        <label><input type="checkbox" id="hiking" value="hiking"> Hiking/Outdoor</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>🎯 Specific Goals & Timeline</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="target_weight">Target Weight (lbs, optional):</label>
+                        <input type="number" id="target_weight" min="66" max="660" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="timeline">Timeline to reach goal:</label>
+                        <select id="timeline" required>
+                            <option value="">Select timeline...</option>
+                            <option value="1_month">1 month</option>
+                            <option value="3_months">3 months</option>
+                            <option value="6_months">6 months</option>
+                            <option value="1_year">1 year</option>
+                            <option value="long_term">Long-term (1+ years)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="motivation">What motivates you to exercise?</label>
+                    <select id="motivation" required>
+                        <option value="">Select motivation...</option>
+                        <option value="health">Health & wellness</option>
+                        <option value="appearance">Look better/confidence</option>
+                        <option value="performance">Athletic performance</option>
+                        <option value="stress">Stress relief</option>
+                        <option value="energy">More energy</option>
+                        <option value="social">Social/fun activity</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>⏰ Schedule & Preferences</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="preferred_time">Preferred workout time:</label>
+                        <select id="preferred_time" required>
+                            <option value="">Select time...</option>
+                            <option value="early_morning">Early morning (5-7 AM)</option>
+                            <option value="morning">Morning (7-10 AM)</option>
+                            <option value="midday">Midday (10 AM-2 PM)</option>
+                            <option value="afternoon">Afternoon (2-6 PM)</option>
+                            <option value="evening">Evening (6-9 PM)</option>
+                            <option value="night">Night (9+ PM)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout_location">Preferred workout location:</label>
+                        <select id="workout_location" required>
+                            <option value="">Select location...</option>
+                            <option value="home">Home</option>
+                            <option value="gym">Gym</option>
+                            <option value="outdoor">Outdoor</option>
+                            <option value="mixed">Mixed (home + gym/outdoor)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="equipment">Available equipment (select all that apply):</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label><input type="checkbox" id="no_equipment" value="no_equipment"> No equipment</label>
+                        <label><input type="checkbox" id="dumbbells" value="dumbbells"> Dumbbells</label>
+                        <label><input type="checkbox" id="resistance_bands" value="resistance_bands"> Resistance bands</label>
+                        <label><input type="checkbox" id="yoga_mat" value="yoga_mat"> Yoga mat</label>
+                        <label><input type="checkbox" id="full_gym" value="full_gym"> Full gym access</label>
+                        <label><input type="checkbox" id="cardio_machine" value="cardio_machine"> Cardio machines</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>🍎 Health & Nutrition</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sleep_hours">Average sleep per night:</label>
+                        <select id="sleep_hours" required>
+                            <option value="">Select hours...</option>
+                            <option value="less_than_5">Less than 5 hours</option>
+                            <option value="5-6_hours">5-6 hours</option>
+                            <option value="6-7_hours">6-7 hours</option>
+                            <option value="7-8_hours">7-8 hours</option>
+                            <option value="8+_hours">8+ hours</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="stress_level">Current stress level:</label>
+                        <select id="stress_level" required>
+                            <option value="">Select level...</option>
+                            <option value="low">Low</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="high">High</option>
+                            <option value="very_high">Very high</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dietary_restrictions">Dietary Restrictions (optional):</label>
+                    <textarea id="dietary_restrictions" placeholder="e.g., vegetarian, gluten-free, allergies..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="medical_conditions">Medical Conditions (optional):</label>
+                    <textarea id="medical_conditions" placeholder="e.g., diabetes, heart condition, injuries..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Complete Setup & Start Your Journey! 🚀</button>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function updateProgress() {
+            const form = document.getElementById('onboardingForm');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            let filled = 0;
+            
+            inputs.forEach(input => {
+                if (input.value.trim()) filled++;
+            });
+            
+            const progress = (filled / inputs.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showMessage(text, isError = false) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${isError ? 'error' : 'success'}">${text}</div>`;
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const token = localStorage.getItem('fitbot_token');
+            if (!token) {
+                window.location.replace('auth.html');
+                return;
+            }
+
+            // Collect exercise preferences
+            const exerciseTypes = [];
+            ['cardio', 'strength', 'yoga', 'sports', 'swimming', 'cycling', 'dancing', 'hiking'].forEach(type => {
+                if (document.getElementById(type)?.checked) exerciseTypes.push(type);
+            });
+            
+            // Collect equipment
+            const equipment = [];
+            ['no_equipment', 'dumbbells', 'resistance_bands', 'yoga_mat', 'full_gym', 'cardio_machine'].forEach(eq => {
+                if (document.getElementById(eq)?.checked) equipment.push(eq);
+            });
+
+            const profileData = {
+                age: parseInt(document.getElementById('age').value),
+                weight: parseFloat(document.getElementById('weight').value),
+                height: parseInt(document.getElementById('height').value),
+                fitness_level: document.getElementById('fitness_level').value,
+                primary_goal: document.getElementById('primary_goal').value,
+                activity_level: document.getElementById('activity_level').value,
+                workout_frequency: document.getElementById('workout_frequency').value,
+                workout_duration: document.getElementById('workout_duration').value,
+                target_weight: document.getElementById('target_weight').value ? parseFloat(document.getElementById('target_weight').value) : null,
+                timeline: document.getElementById('timeline').value,
+                motivation: document.getElementById('motivation').value,
+                preferred_time: document.getElementById('preferred_time').value,
+                workout_location: document.getElementById('workout_location').value,
+                sleep_hours: document.getElementById('sleep_hours').value,
+                stress_level: document.getElementById('stress_level').value,
+                dietary_restrictions: document.getElementById('dietary_restrictions').value,
+                medical_conditions: document.getElementById('medical_conditions').value,
+                preferences: {
+                    exercise_types: exerciseTypes,
+                    equipment: equipment
+                }
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+
+                if (response.ok) {
+                    showMessage('Profile saved successfully! Redirecting to your personalized Agent Sportacus...');
+                    setTimeout(() => {
+                        window.location.replace('app.html');
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    showMessage(error.detail || 'Failed to save profile', true);
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', true);
+            }
+        }
+
+        // Add event listeners
+        document.getElementById('onboardingForm').addEventListener('submit', handleSubmit);
+        document.getElementById('onboardingForm').addEventListener('input', updateProgress);
+        document.getElementById('onboardingForm').addEventListener('change', updateProgress);
+
+        // Check authentication
+        if (!localStorage.getItem('fitbot_token')) {
+            window.location.replace('auth.html');
+        }
+
+        // Initial progress update
+        updateProgress();
+    </script>
+</body>
+</html>
