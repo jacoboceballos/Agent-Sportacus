@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Sportacus - Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 100px auto; padding: 20px; background: #f5f5f5; }
+        .auth-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #333; margin: 0; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+        .btn:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #545b62; }
+        .error { color: #dc3545; margin-top: 10px; text-align: center; }
+        .success { color: #28a745; margin-top: 10px; text-align: center; }
+        .toggle-link { text-align: center; margin-top: 20px; }
+        .toggle-link a { color: #007bff; text-decoration: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="header">
+            <h1>🏋️ Agent Sportacus</h1>
+            <p id="authTitle">Login to Your Account</p>
+        </div>
+
+        <form id="authForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            
+            <button type="submit" class="btn" id="authButton">Login</button>
+        </form>
+
+        <div class="toggle-link">
+            <span id="toggleText">Don't have an account?</span>
+            <a id="toggleLink">Sign up here</a>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let isLogin = true;
+        const API_BASE = 'http://localhost:8000';
+
+        function toggleAuthMode() {
+            isLogin = !isLogin;
+            
+            if (isLogin) {
+                document.getElementById('authTitle').textContent = 'Login to Your Account';
+                document.getElementById('authButton').textContent = 'Login';
+                document.getElementById('toggleText').textContent = "Don't have an account?";
+                document.getElementById('toggleLink').textContent = 'Sign up here';
+            } else {
+                document.getElementById('authTitle').textContent = 'Create New Account';
+                document.getElementById('authButton').textContent = 'Sign Up';
+                document.getElementById('toggleText').textContent = 'Already have an account?';
+                document.getElementById('toggleLink').textContent = 'Login here';
+            }
+            
+            document.getElementById('message').innerHTML = '';
+        }
+
+        function showMessage(text, isError = false) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${isError ? 'error' : 'success'}">${text}</div>`;
+        }
+
+        async function handleAuth(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showMessage('Please fill in all fields', true);
+                return;
+            }
+
+            try {
+                const endpoint = isLogin ? '/auth/login' : '/auth/register';
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('fitbot_token', data.access_token);
+                    localStorage.setItem('fitbot_user_id', data.user_id);
+                    
+                    if (isLogin) {
+                        // Check if user has profile
+                        const profileResponse = await fetch(`${API_BASE}/profile/get`, {
+                            headers: { 'Authorization': `Bearer ${data.access_token}` }
+                        });
+                        
+                        if (profileResponse.ok) {
+                            window.location.replace('app.html');
+                        } else {
+                            window.location.replace('onboarding.html');
+                        }
+                    } else {
+                        showMessage('Account created! Please complete your profile.');
+                        setTimeout(() => {
+                            window.location.replace('onboarding.html');
+                        }, 1500);
+                    }
+                } else {
+                    showMessage(data.detail || 'Authentication failed', true);
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', true);
+            }
+        }
+
+        document.getElementById('toggleLink').addEventListener('click', toggleAuthMode);
+        document.getElementById('authForm').addEventListener('submit', handleAuth);
+
+        // Check if already logged in
+        function checkAuthStatus() {
+            const token = localStorage.getItem('fitbot_token');
+            if (token) {
+                // Verify token is still valid
+                fetch(`${API_BASE}/profile/get`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.replace('app.html');
+                    } else {
+                        // Token invalid, clear storage
+                        localStorage.clear();
+                        sessionStorage.clear();
+                    }
+                }).catch(() => {
+                    // Network error, clear storage to be safe
+                    localStorage.clear();
+                    sessionStorage.clear();
+                });
+            }
+        }
+        
+        checkAuthStatus();
+    </script>
+</body>
+</html>
