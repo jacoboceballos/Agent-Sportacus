@@ -1,6 +1,6 @@
 # 🏋️ Agent Sportacus - Your Personal AI Fitness Trainer
 
-A comprehensive fitness trainer application powered by Amazon Bedrock with intelligent workout planning, nutrition advice, and progress tracking.
+A comprehensive fitness trainer application powered by Amazon Bedrock & Strands with intelligent workout planning, nutrition advice, and progress tracking.
 
 ## 🌟 Features Overview
 
@@ -112,17 +112,16 @@ A comprehensive fitness trainer application powered by Amazon Bedrock with intel
 
 ### Prerequisites
 - Python 3.8+
-- Amazon Bedrock access (for AI features)
+- AWS Credentials
 - Web browser (Chrome, Firefox, Safari, Edge)
 
 ### Installation
 
-1. **Clone and Setup Backend**:
+1. **Clone and Setup Backend (Advised to install dependencies in a virtual environment)**:
 ```bash
-cd fitness-trainer-app/backend
-
-pip install fastapi uvicorn sqlite3 jwt pydantic
+pip install fastapi uvicorn jwt pydantic
 pip install strands-agents strands-agents-tools
+cd Agent-Sportacus/backend
 ```
 
 2. **Start the Server**:
@@ -133,6 +132,7 @@ python simple_ai_server.py
 3. **Open the App**:
    - Navigate to `frontend/auth.html` in your web browser
    - Or serve via local server: `python -m http.server 8080` in frontend directory
+   - Then go to browser and type: `localhost:8080/auth.html`
 
 ## 📱 How to Use Agent Sportacus
 
