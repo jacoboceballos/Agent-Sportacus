@@ -16,7 +16,7 @@ security = HTTPBearer()
 # Mount static files for frontend
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.exists(frontend_path):
-    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -259,6 +259,19 @@ async def update_workout_entry(entry_id: int, entry: WorkoutEntry, user_id: int 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "mode": "simple_ai"}
+
+# Serve frontend files
+@app.get("/")
+async def serve_auth():
+    from fastapi.responses import FileResponse
+    frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "auth.html")
+    return FileResponse(frontend_path)
+
+@app.get("/auth.html")
+async def serve_auth_html():
+    from fastapi.responses import FileResponse
+    frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "auth.html")
+    return FileResponse(frontend_path)
 
 if __name__ == "__main__":
     import uvicorn

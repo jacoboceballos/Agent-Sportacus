@@ -10,6 +10,3 @@ run:
   network:
     port: 8000
     env: PORT
-  env:
-    - name: AWS_DEFAULT_REGION
-      value: us-east-1
