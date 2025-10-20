@@ -1,15 +1,22 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import jwt
+import os
 from datetime import datetime, timedelta
 from database import db
 from strands_fitness_agent import fitness_agent
 import traceback
 
-app = FastAPI(title="FitBot Simple AI API")
+app = FastAPI(title="Agent Sportacus API")
 security = HTTPBearer()
+
+# Mount static files for frontend
+frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
 
 app.add_middleware(
     CORSMiddleware,
