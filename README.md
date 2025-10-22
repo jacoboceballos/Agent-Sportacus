@@ -1,6 +1,6 @@
 # 🏋️ Agent Sportacus - Your Personal AI Fitness Trainer
 
-A comprehensive fitness trainer application powered by Amazon Bedrock & Strands with intelligent workout planning, nutrition advice, and progress tracking.
+A comprehensive fitness trainer application powered by Amazon Bedrock & Strands with intelligent workout planning, nutrition advice, and progress tracking. Available to anyone on their own local machine!
 
 ## 🌟 Features Overview
 
